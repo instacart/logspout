@@ -1,5 +1,5 @@
-hash: 83a577e65396190336bd5117580f29dbf983a3e2fdc5732a111ae56f229ed978
-updated: 2017-11-07T22:39:32.638917215-06:00
+hash: 50a6e60f32b54f8c6b8ef5ee70504dbb36471b88a487b91dd034efde1b712a1f
+updated: 2018-11-07T13:11:54.481072-05:00
 imports:
 - name: github.com/docker/docker
   version: ad969f1aa782478725a7f338cf963fa82f484609
@@ -45,4 +45,8 @@ imports:
   version: a408501be4d17ee978c04a618e7a1b22af058c0e
   subpackages:
   - unix
+- name: golang.org/x/time
+  version: fbb02b2291d28baffd63558aa44b4b56f178d650
+  subpackages:
+  - rate
 testImports: []

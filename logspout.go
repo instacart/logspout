@@ -36,6 +36,9 @@ func main() {
 	if getopt("BACKLOG", "") != "" {
 		fmt.Printf("backlog:%s ", getopt("BACKLOG", ""))
 	}
+	if getopt("RATE_LIMIT", "") != "" {
+		fmt.Printf("rateLimit:%s ", getopt("RATE_LIMIT", ""))
+	}
 	fmt.Printf("persist:%s\n", getopt("ROUTESPATH", "/mnt/routes"))
 
 	var jobs []string
