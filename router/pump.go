@@ -6,11 +6,13 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/fsouza/go-dockerclient"
+	"golang.org/x/time/rate"
 )
 
 var allowTTY bool
@@ -51,6 +53,18 @@ func setAllowTTY() {
 		allowTTY = true
 	}
 	debug("setting allowTTY to:", allowTTY)
+}
+
+func rateLimit() rate.Limit {
+	rateLimitEnv := os.Getenv("RATE_LIMIT")
+	if rateLimitEnv == "" {
+		return rate.Inf
+	}
+	rateLimit, err := strconv.ParseFloat(rateLimitEnv, 64)
+	if err != nil {
+		return rate.Inf
+	}
+	return rate.Limit(rateLimit)
 }
 
 func assert(err error, context string) {
@@ -361,6 +375,9 @@ func newContainerPump(container *docker.Container, stdout, stderr io.Reader) *co
 		logstreams: make(map[chan *Message]*Route),
 	}
 	pump := func(source string, input io.Reader) {
+		rateLimit := rateLimit()
+		burstLimit := int(rateLimit) * 2
+		limiter := rate.NewLimiter(rateLimit, burstLimit)
 		buf := bufio.NewReader(input)
 		for {
 			line, err := buf.ReadString('\n')
@@ -376,6 +393,10 @@ func newContainerPump(container *docker.Container, stdout, stderr io.Reader) *co
 				Time:      time.Now(),
 				Source:    source,
 			})
+			if rateLimit != rate.Inf {
+				reserve := limiter.Reserve()
+				time.Sleep(reserve.Delay())
+			}
 		}
 	}
 	go pump("stdout", stdout)
